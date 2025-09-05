@@ -1,5 +1,6 @@
 package com.assessment.user_service.config;
 
+import com.assessment.user_service.config.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,15 +19,24 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
+    // Define the public URLs
+    private static final String[] PUBLIC_URLS = {
+            "/auth/**",
+            "/v3/api-docs/**",
+            "/v3/api-docs.yaml",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // ONLY allow access to our public authentication endpoints
-                        .requestMatchers("/auth/**").permitAll()
+                        // Allow public access to the URLs defined above
+                        .requestMatchers(PUBLIC_URLS).permitAll()
 
-                        // Secure ALL other requests, including everything under /users
+                        // Secure all other requests
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
