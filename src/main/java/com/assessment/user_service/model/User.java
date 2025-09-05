@@ -15,22 +15,46 @@ import java.time.Instant;
 @NoArgsConstructor
 public class User {
 
+    /**
+     * The unique identifier for the user.
+     */
     @Id
     private String id;
 
+    /**
+     * The name of the user.
+     */
     private String name;
 
+    /**
+     * The email of the user. This is unique.
+     */
     @Indexed(unique = true)
     private String email;
 
+    /**
+     * The age of the user.
+     */
     private Integer age;
 
+    /**
+     * The timestamp of when the user was created.
+     */
     @CreatedDate
     private Instant createdAt;
 
+    /**
+     * The timestamp of when the user was last updated.
+     */
     @LastModifiedDate
     private Instant updatedAt;
 
+    /**
+     * Constructs a new User with the given name, email, and age.
+     * @param name The name of the user.
+     * @param email The email of the user.
+     * @param age The age of the user.
+     */
     public User(String name, String email, Integer age) {
         this.name = name;
         this.email = email;

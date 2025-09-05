@@ -17,6 +17,11 @@ public class AuthService {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Authenticates a user and returns a JWT token.
+     * @param request The authentication request containing the user's email and password.
+     * @return An authentication response containing the JWT token.
+     */
     public AuthResponse login(AuthRequest request) {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());

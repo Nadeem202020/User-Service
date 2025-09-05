@@ -19,21 +19,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest // Loads the full application context
-@AutoConfigureMockMvc // Configures MockMvc for sending requests
+@SpringBootTest
+@AutoConfigureMockMvc
 class UserControllerIntegrationTest {
 
     @Autowired
-    private MockMvc mockMvc; // The tool for making fake API calls
+    private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper; // For converting Java objects to JSON strings
+    private ObjectMapper objectMapper;
 
-    @MockBean // Replaces the real UserService bean with a mock for this test
+    @MockBean
     private UserService userService;
 
     @Test
-    @WithMockUser // Bypasses JWT security by simulating a logged-in user
+    @WithMockUser
     void whenPostUsers_withValidData_shouldReturn201Created() throws Exception {
         // Given
         CreateUserRequest request = new CreateUserRequest();
@@ -46,15 +46,14 @@ class UserControllerIntegrationTest {
         returnedUser.setName(request.getName());
         returnedUser.setEmail(request.getEmail());
 
-        // We mock the service layer's behavior
         given(userService.createUser(any(CreateUserRequest.class))).willReturn(returnedUser);
 
         // When & Then
-        mockMvc.perform(post("/users") // Perform a POST request
+        mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))) // Set the request body
-                .andExpect(status().isCreated()) // Assert the HTTP status is 201
-                .andExpect(jsonPath("$.id").value("new-user-id")) // Assert fields in the JSON response
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value("new-user-id"))
                 .andExpect(jsonPath("$.name").value("API Test User"));
     }
 
@@ -66,10 +65,9 @@ class UserControllerIntegrationTest {
         request.setEmail("forbidden@example.com");
 
         // When & Then
-        // We do NOT use @WithMockUser, so the request is anonymous
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden()); // Assert the HTTP status is 403
+                .andExpect(status().isForbidden());
     }
 }

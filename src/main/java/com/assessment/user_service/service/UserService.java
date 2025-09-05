@@ -19,14 +19,17 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Creates a new user.
+     * @param request The request containing the user's details.
+     * @return The created user.
+     * @throws EmailAlreadyExistsException if the email already exists.
+     */
     public User createUser(CreateUserRequest request) {
-        // 1. Perform the check BEFORE attempting to create the user
         if (userRepository.existsByEmail(request.getEmail())) {
-            // 2. If the email exists, throw our specific, user-friendly exception
             throw new EmailAlreadyExistsException("An account with email '" + request.getEmail() + "' already exists.");
         }
 
-        // 3. If the check passes, proceed with creating and saving the user
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
@@ -35,20 +38,36 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    /**
+     * Returns a paginated list of all users.
+     * @param pageable The pagination information.
+     * @return A paginated list of users.
+     */
     public Page<User> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
 
+    /**
+     * Returns a user by their ID.
+     * @param id The ID of the user to retrieve.
+     * @return An optional containing the user if found, or empty otherwise.
+     */
     public Optional<User> getUserById(String id) {
         return userRepository.findById(id);
     }
 
+    /**
+     * Updates a user.
+     * @param id The ID of the user to update.
+     * @param userDetails The request containing the updated user details.
+     * @return The updated user.
+     * @throws ResourceNotFoundException if the user is not found.
+     * @throws EmailAlreadyExistsException if the new email is already in use by another account.
+     */
     public User updateUser(String id, UpdateUserRequest userDetails) {
-        // 1. Find the existing user or throw an exception
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        // 2. Update non-email fields (if they are provided in the request)
         if (userDetails.getName() != null) {
             user.setName(userDetails.getName());
         }
@@ -56,24 +75,22 @@ public class UserService {
             user.setAge(userDetails.getAge());
         }
 
-        // 3. Handle the email update with careful validation
         String newEmail = userDetails.getEmail();
-        // Check if a new email was provided AND if it's different from the current one
         if (newEmail != null && !newEmail.equalsIgnoreCase(user.getEmail())) {
-
-            // Use our new repository method to check if this email is taken by SOMEONE ELSE
             if (userRepository.existsByEmailAndIdNot(newEmail, id)) {
                 throw new EmailAlreadyExistsException("Email '" + newEmail + "' is already in use by another account.");
             }
-
-            // If the check passes, update the email
             user.setEmail(newEmail);
         }
 
-        // 4. Save the updated user to the database
         return userRepository.save(user);
     }
 
+    /**
+     * Deletes a user.
+     * @param id The ID of the user to delete.
+     * @throws ResourceNotFoundException if the user is not found.
+     */
     public void deleteUser(String id) {
         if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("User not found with id: " + id);

@@ -33,12 +33,23 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    /**
+     * Creates a new user.
+     * @param request The request body containing the user's details.
+     * @return The created user.
+     */
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody CreateUserRequest request) {
         User savedUser = userService.createUser(request);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
+    /**
+     * Returns a paginated list of all users.
+     * @param page The page number to retrieve.
+     * @param size The number of users per page.
+     * @return A paginated list of users.
+     */
     @GetMapping
     public Page<User> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
@@ -47,6 +58,11 @@ public class UserController {
         return userService.getAllUsers(pageable);
     }
 
+    /**
+     * Returns a user by their ID.
+     * @param id The ID of the user to retrieve.
+     * @return The user with the specified ID.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable String id) {
         return userService.getUserById(id)
@@ -54,22 +70,30 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Updates a user.
+     * @param id The ID of the user to update.
+     * @param request The request body containing the updated user details.
+     * @return The updated user.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserRequest request) {
         User updatedUser = userService.updateUser(id, request);
         return ResponseEntity.ok(updatedUser);
     }
 
+    /**
+     * Deletes a user.
+     * @param id The ID of the user to delete.
+     * @return A confirmation message.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String id) {
-        // This line remains the same. The service performs the action.
         userService.deleteUser(id);
 
-        // 2. Create a response body (a Map that will be converted to JSON)
         Map<String, String> response = new HashMap<>();
         response.put("message", "User with ID " + id + " has been deleted successfully.");
 
-        // 3. Return the response body with a 200 OK status
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
